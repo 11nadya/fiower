@@ -75,10 +75,10 @@ margin-top:30px;
 <a href="flora.html">Back to Home</a>
 <hr>
 <div id="cart-section" style="padding: 20px; background: #fff5f5; border-radius: 10px; margin-top: 20px; border: 2px dashed #f2a3b3;">
-    <h3>🛒 سلة التسوق الخاصة بك</h3>
+<h3 style="color: #f2a3b3;">🛒 Your Shopping Cart</h3>  
     <ul id="cart-items" style="list-style: none; padding: 0;">
         </ul>
-    <p style="font-size: 1.2em;"><b>المجموع الكلي: </b> SR <span id="total-price" style="color: #f2a3b3;">0</span></p>
+<p style="font-size: 1.2em;"><b>Total Price:</b> SR <span id="total-price" style="color: #f2a3b3;">0</span></p>
 </div>
 
 <script>
@@ -106,12 +106,13 @@ function updateCartDisplay() {
     cart.forEach(item => {
         const li = document.createElement('li');
         li.style.padding = "5px 0";
-        li.textContent = "🌸 " + item.name + " - SR " + item.price;
+li.textContent = item.name + " : SR " + item.price;     
         cartList.appendChild(li);
     });
     
     totalDisplay.textContent = total;
 }
+
 </script>
 </body>
 </html>
