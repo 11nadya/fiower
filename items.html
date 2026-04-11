@@ -57,32 +57,46 @@ margin-top:30px;
 
 <div class="item">
 
-<img src="imgs/balloons.jpg">
 
-<button>+</button>
-<button>-</button>
+<div style="margin-bottom: 30px; border: 1px solid #f2a3b3; padding: 15px; border-radius: 10px;">
+        <img src="balloons.jpg" style="width:150px; border-radius:10px;">
+        <p><b>Multicolor Balloon</b></p>
+        <p>Price: 20 SR</p>
+        <button onclick="changeQty1(1)">+</button>
+        <span id="qty1" style="font-weight:bold; margin:0 10px;">0</span>
+        <button onclick="changeQty1(-1)">-</button>
+    </div>
 
-<p><b>multicolor Balloon</b></p>
-<p>Price: 20 SR (Each)</p>
+    <div style="margin-bottom: 30px; border: 1px solid #f2a3b3; padding: 15px; border-radius: 10px;">
+        <img src="ballons.jpg" style="width:150px; border-radius:10px;">
+        <p><b>Party Balloons</b></p>
+        <p>Price: 20 SR</p>
+        <button onclick="changeQty2(1)">+</button>
+        <span id="qty2" style="font-weight:bold; margin:0 10px;">0</span>
+        <button onclick="changeQty2(-1)">-</button>
+    </div>
 
-</div>
+    <br>
+    <a href="flora.html" style="text-decoration:none; color:#c05a7a; font-weight:bold;">Back to Home</a>
 
+    <script>
+        // برمجة المنتج الأول
+        let q1 = 0;
+        function changeQty1(amount) {
+            if (q1 + amount >= 0) {
+                q1 += amount;
+                document.getElementById('qty1').innerText = q1;
+            }
+        }
 
-
-<div class="item">
-
-<img src="imgs/ballons.jpg">
-
-<button>+</button>
-<button>-</button>
-
-<p><b>Multicolor balloons</b></p>
-<p>Price: 20 SR</p>
-
-</div>
-
-
-<a href="flora.html">Back to Home</a>
-
+        // برمجة المنتج الثاني
+        let q2 = 0;
+        function changeQty2(amount) {
+            if (q2 + amount >= 0) {
+                q2 += amount;
+                document.getElementById('qty2').innerText = q2;
+            }
+        }
+    </script>
 </body>
 </html>
