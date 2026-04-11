@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fffafb;
+            text-align: center;
+            padding: 20px;
+            color: #444;
+        }
+        h1 { color: #c05a7a; margin-bottom: 30px; }
+        .cart-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px solid #f2a3b3;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #ffebee;
+        }
+        .item-info { text-align: left; }
+        .item-name { font-weight: bold; color: #c05a7a; }
+        .total-section {
+            margin-top: 20px;
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #c05a7a;
+        }
+        .btn {
+            background-color: #c05a7a;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .btn-clear {
+            background-color: #999;
+            font-size: 0.9em;
+        }
+        .empty-msg { padding: 40px; color: #999; }
+    </style>
+</head>
+<body>
+
+    <h1>Your Shopping Cart 🛒</h1>
+
+    <div class="cart-container" id="cart-wrapper">
+        <div id="cart-list">
+            </div>
+        
+        <div id="total-price" class="total-section">
+            </div>
+    </div>
+
+    <br>
+    <button class="btn btn-clear" onclick="clearCart()">Empty Cart 🗑️</button>
+    <br><br>
+    <a href="flora.html" class="btn">Continue Shopping 🌸</a>
+
+    <script>
+        function loadCartData() {
+            const listDiv = document.getElementById('cart-list');
+            const totalDiv = document.getElementById('total-price');
+            let grandTotal = 0;
+
+            // Define the products we have in our store
+            const products = [
+                { id: 'qty_balloons1', name: 'Multicolor Balloons', price: 20 },
+                { id: 'qty_balloons2', name: 'Party Balloons', price: 20 },
+                { id: 'single_flower', name: 'Single Rose', price: 15 }
+            ];
+
+            let htmlContent = "";
+
+            products.forEach(product => {
+                // Get quantity from localStorage
+                let quantity = parseInt(localStorage.getItem(product.id)) || 0;
+
+                if (quantity > 0) {
+                    let itemTotal = quantity * product.price;
+                    grandTotal += itemTotal;
+
+                    htmlContent += `
+                        <div class="cart-item">
+                            <div class="item-info">
+                                <div class="item-name">${product.name}</div>
+                                <small>Qty: ${quantity} x ${product.price} SR</small>
+                            </div>
+                            <div class="item-price">${itemTotal} SR</div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (grandTotal === 0) {
+                listDiv.innerHTML = '<div class="empty-msg">Your cart is empty... <br> Go pick some flowers! 🌸</div>';
+                totalDiv.innerText = "";
+            } else {
+                listDiv.innerHTML = htmlContent;
+                totalDiv.innerText = "Total: " + grandTotal + " SR";
+            }
+        }
+
+        function clearCart() {
+            if (confirm("Are you sure you want to empty your cart?")) {
+                localStorage.clear();
+                loadCartData();
+            }
+        }
+
+        // Run the function when the page opens
+        window.onload = loadCartData;
+    </script>
+
+</body>
+</html>
