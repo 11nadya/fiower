@@ -44,6 +44,11 @@ margin-top:30px;
 <body>
 <h1>Single Flowers...</h1>
 <h3>Available Flower Types</h3>
+   <div style="text-align: center; padding: 15px; background-color: #fff5f7; border-radius: 10px; margin-bottom: 20px;">
+    <a href="cart.html" style="text-decoration: none; color: #c05a7a; font-weight: bold; font-size: 1.2em;">
+        🛒 View My Shopping Cart
+    </a>
+</div> 
 <div class="flower">
 <img src="tulip.jpg" width="150">
 <button onclick="addToCart('Pink Tulip', 10)">+</button>
@@ -82,14 +87,23 @@ margin-top:30px;
 </div>
 
 <script>
-let cart = [];
-let total = 0;
-
-function addToCart(name, price) {
-    cart.push({name, price});
-    total += price;
-    updateCartDisplay();
-}
+// نستخدم الذاكرة الدائمة بدلاً من المصفوفة المؤقتة
+    function addToCart(name, price) {
+        // 1. نجيب الكمية الحالية لهذا المنتج من الذاكرة
+        let qty = parseInt(localStorage.getItem(name)) || 0;
+        
+        // 2. نزيد الكمية واحد
+        qty++;
+        
+        // 3. نحفظها في الذاكرة بنفس اسم المنتج
+        localStorage.setItem(name, qty);
+        
+        // تنبيه بسيط للمستخدم
+        alert(name + " added to cart!");
+        
+        // إذا عندك مكان يعرض السعر في نفس الصفحة حدثيه (اختياري)
+        updateCartDisplay(); 
+    }
 
 function removeFromCart(name) {
     const index = cart.findIndex(item => item.name === name);
