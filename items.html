@@ -80,23 +80,34 @@ margin-top:30px;
     <a href="flora.html" style="text-decoration:none; color:#c05a7a; font-weight:bold;">Back to Home</a>
 
     <script>
-        // برمجة المنتج الأول
-        let q1 = 0;
-        function changeQty1(amount) {
-            if (q1 + amount >= 0) {
-                q1 += amount;
-                document.getElementById('qty1').innerText = q1;
-            }
-        }
+    <script>
+    // 1. عند فتح الصفحة، نسحب القيم المحفوظة في المتصفح أو نبدأ بصفر
+    let q1 = parseInt(localStorage.getItem('qty_balloons1')) || 0;
+    let q2 = parseInt(localStorage.getItem('qty_balloons2')) || 0;
 
-        // برمجة المنتج الثاني
-        let q2 = 0;
-        function changeQty2(amount) {
-            if (q2 + amount >= 0) {
-                q2 += amount;
-                document.getElementById('qty2').innerText = q2;
-            }
+    // 2. تحديث الأرقام على الشاشة فوراً
+    document.getElementById('qty1').innerText = q1;
+    document.getElementById('qty2').innerText = q2;
+
+    // برمجة المنتج الأول
+    function changeQty1(amount) {
+        if (q1 + amount >= 0) {
+            q1 += amount;
+            document.getElementById('qty1').innerText = q1;
+            // 3. حفظ القيمة الجديدة في الذاكرة
+            localStorage.setItem('qty_balloons1', q1);
         }
-    </script>
+    }
+
+    // برمجة المنتج الثاني
+    function changeQty2(amount) {
+        if (q2 + amount >= 0) {
+            q2 += amount;
+            document.getElementById('qty2').innerText = q2;
+            // 4. حفظ القيمة الجديدة في الذاكرة
+            localStorage.setItem('qty_balloons2', q2);
+        }
+    }
+</script>
 </body>
 </html>
