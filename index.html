@@ -37,7 +37,11 @@
 
 <button onclick="login()">Login</button>
 <p id="msg"></p>
+ <p>Don't have an account? 
+    <a href="Register.html" style="color: #c05a7a; text-decoration: none; font-weight: bold;">Register here</a>
+</p>   
 <script type="module">
+    
   // 1. ربط المكتبات السحابية
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
   import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
