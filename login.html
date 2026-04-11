@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+        }
+
+        input {
+            padding: 10px;
+            margin: 10px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #c05a7a;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        h1 {
+            color: #c05a7a;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Login</h1>
+
+<input type="text" id="user" placeholder="Username"><br>
+<input type="password" id="pass" placeholder="Password"><br>
+
+<button onclick="login()">Login</button>
+
+<p id="msg"></p>
+
+<script>
+function login() {
+    var u = document.getElementById("user").value;
+    var p = document.getElementById("pass").value;
+
+    if (u !== "" && p !== "") {
+        window.location.href = "flora.html"; 
+    } else {
+        document.getElementById("msg").innerHTML = "Please enter username and password";
+    }
+}
+</script>
+
+</body>
+</html>
