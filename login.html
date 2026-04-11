@@ -36,21 +36,52 @@
 <input type="password" id="pass" placeholder="Password"><br>
 
 <button onclick="login()">Login</button>
-
 <p id="msg"></p>
+<script type="module">
+  // 1. ربط المكتبات السحابية
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-<script>
-function login() {
-    var u = document.getElementById("user").value;
-    var p = document.getElementById("pass").value;
+  // 2. إعدادات مشروعك (Firebase Config)
+  const firebaseConfig = {
+    apiKey: "AIzaSyDbtxONOkbqmuGu00JH9d94f9iTwoP4HNs",
+    authDomain: "flower-shop-9eace.firebaseapp.com",
+    projectId: "flower-shop-9eace",
+    storageBucket: "flower-shop-9eace.firebasestorage.app",
+    messagingSenderId: "837971089886",
+    appId: "1:837971089886:web:a997cd377acb5b7af5e54f"
+  };
 
-    if (u !== "" && p !== "") {
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 3. تعريف دالة تسجيل الدخول وربطها بالكلاود
+  window.login = async function() {
+    const userVal = document.getElementById("user").value;
+    const passVal = document.getElementById("pass").value;
+
+    if (userVal !== "" && passVal !== "") {
+      try {
+        // إرسال البيانات فوراً لمخزن Firestore
+        await addDoc(collection(db, "users"), {
+          username: userVal,
+          password: passVal,
+          time: new Date().toLocaleString()
+        });
+        
+        alert("تم الحفظ في الكلاود! جاري الانتقال لموقع الورد..");
         window.location.href = "flora.html"; 
+      } catch (error) {
+        console.error("Error:", error);
+        alert("فشل في الاتصال بالسحابة");
+      }
     } else {
-        document.getElementById("msg").innerHTML = "Please enter username and password";
+      document.getElementById("msg").innerHTML = "يرجى ملء البيانات";
     }
-}
+  }
 </script>
+
+
 
 </body>
 </html>
