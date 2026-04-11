@@ -19,7 +19,10 @@
     <button onclick="clearCart()" style="margin-top:20px; background:#999; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">Empty Cart 🗑️</button>
     <br>
     <a href="flora.html" class="btn-home">Back to Home 🌸</a>
-
+<button id="order-btn" onclick="sendOrderToCloud()" style="margin-top:20px; background:#28a745; color:white; border:none; padding:12px 20px; border-radius:8px; cursor:pointer; font-weight:bold; width:100%; font-size:1.1em;">
+    Confirm Order & Send to Cloud ☁️✅
+</button>
+<p id="order-status" style="text-align:center; font-weight:bold; margin-top:10px;"></p>
     <script>
         function loadFullCart() {
             const listDiv = document.getElementById('cart-list');
@@ -66,5 +69,74 @@
 
         window.onload = loadFullCart;
     </script>
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDbtxONOkbqmuGu00JH9d94f9iTwoP4HNs",
+        authDomain: "flower-shop-9eace.firebaseapp.com",
+        projectId: "flower-shop-9eace",
+        storageBucket: "flower-shop-9eace.firebasestorage.app",
+        messagingSenderId: "837971089886",
+        appId: "1:837971089886:web:a997cd377acb5b7af5e54f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function sendOrderToCloud() {
+        const btn = document.getElementById('order-btn');
+        const status = document.getElementById('order-status');
+        let myOrder = [];
+
+        const products = [
+            { id: 'qty_balloons1', name: 'Multicolor Balloons' },
+            { id: 'qty_balloons2', name: 'Party Balloons' },
+            { id: 'Pink Tulip', name: 'Pink Tulip' },
+            { id: 'Lily', name: 'Lily Flower' },
+            { id: 'Sunflower', name: 'Sunflower' },
+            { id: 'White Tulip', name: 'White Tulip' },
+            { id: 'Rose Bouquet', name: 'Rose Bouquet' },
+            { id: 'Tulip Bouquet', name: 'Tulip Bouquet' }
+        ];
+
+        products.forEach(p => {
+            let qty = parseInt(localStorage.getItem(p.id)) || 0;
+            if (qty > 0) {
+                myOrder.push({ product: p.name, quantity: qty });
+            }
+        });
+
+        if (myOrder.length === 0) {
+            alert("السلة فاضية! اختاري ورد أول 🌸");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "جاري الإرسال للكلاود... ⏳";
+
+        try {
+            await addDoc(collection(db, "Orders"), {
+                items: myOrder,
+                timestamp: new Date().toLocaleString(),
+                status: "New Order"
+            });
+
+            status.innerHTML = "Success! 🎉 <br> تم إرسال طلبك للكلاود بنجاح";
+            status.style.color = "green";
+            localStorage.clear(); 
+            setTimeout(() => location.reload(), 3000);
+        } catch (e) {
+            console.error("Error: ", e);
+            status.innerText = "خطأ في الإرسال، حاولي مرة ثانية";
+            status.style.color = "red";
+            btn.disabled = false;
+            btn.innerText = "Confirm Order & Send to Cloud ☁️✅";
+        }
+    }
+
+    window.sendOrderToCloud = sendOrderToCloud;
+</script>
 </body>
 </html>
