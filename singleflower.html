@@ -98,21 +98,22 @@ function removeFromCart(name) {
         cart.splice(index, 1);
         updateCartDisplay();
     }
+}
+
 function updateCartDisplay() {
     const cartList = document.getElementById('cart-items');
     const totalDisplay = document.getElementById('total-price');
     
-    cartList.innerHTML = ''; 
+    cartList.innerHTML = '';
     cart.forEach(item => {
         const li = document.createElement('li');
         li.style.padding = "5px 0";
-li.textContent = item.name + " : SR " + item.price;     
+        li.textContent = item.name + " : SR " + item.price;
         cartList.appendChild(li);
     });
     
     totalDisplay.textContent = total;
 }
-
 </script>
 </body>
 </html>
