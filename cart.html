@@ -1,254 +1,125 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Global Shopping Cart</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #fffafb; text-align: center; padding: 20px; }
-        .cart-box { background: white; border: 2px solid #f2a3b3; border-radius: 15px; padding: 20px; max-width: 500px; margin: auto; }
-        .item-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
-        .total-price { font-size: 1.5em; color: #c05a7a; margin-top: 20px; font-weight: bold; }
-        .btn-home { display: inline-block; margin-top: 20px; color: #c05a7a; text-decoration: none; font-weight: bold; border: 1px solid #c05a7a; padding: 10px; border-radius: 5px; }
-    </style>
-</head>
-<body>
-    <h1>My Combined Cart 🛒</h1>
-    <div class="cart-box" id="cart-list">
-        </div>
-    
-    <button onclick="clearCart()" style="margin-top:20px; background:#999; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">Empty Cart 🗑️</button>
-    <br>
-    <a href="flora.html" class="btn-home">Back to Home 🌸</a>
-    <div id="user-info" style="background: white; border: 2px solid #f2a3b3; border-radius: 15px; padding: 15px; max-width: 500px; margin: 20px auto; text-align: left;">
-    <h3 style="color: #c05a7a; text-align: center; margin-top: 0;">Delivery Details 🚚</h3>
-    
-    <div style="margin-bottom: 10px;">
-        <label style="font-weight: bold; color: #c05a7a;">Phone Number:</label><br>
-        <input type="text" id="phone-input" placeholder="05xxxxxxxx" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">
-    </div>
-
-    <div style="margin-bottom: 10px;">
-        <label style="font-weight: bold; color: #c05a7a;">Location:</label><br>
-        <input type="text" id="location-input" placeholder="City, Street..." style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">
-    </div>
-
-    <div style="margin-bottom: 10px;">
-        <label style="font-weight: bold; color: #c05a7a;">Payment Method:</label><br>
-        <select id="payment-input" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">
-            <option value="Cash">Cash on Delivery</option>
-            <option value="Mada">Mada / Apple Pay</option>
-        </select>
-    </div>
-</div>
-<button id="order-btn" onclick="sendOrderToCloud()" style="margin-top:20px; background:#28a745; color:white; border:none; padding:12px 20px; border-radius:8px; cursor:pointer; font-weight:bold; width:100%; font-size:1.1em;">
-    Confirm Order & Send to Cloud ☁️✅
-</button>
-    <p id="order-status" style="text-align:center; font-weight:bold;"></p>
-<div id="orders-history" style="background: white; border: 2px solid #f2a3b3; border-radius: 15px; padding: 15px; max-width: 500px; margin: 20px auto; text-align: left;">
-    <h3 style="color: #c05a7a; text-align: center; margin-top: 0;">Recent Payments 💳</h3>
-    <ul id="payments-list" style="list-style: none; padding: 0;">
-        <li style="color: #999; text-align: center;">No orders confirmed yet.</li>
-    </ul>
-</div>    <script>
-async function sendOrderToCloud() {
-    // 1. سحب البيانات من الخانات
-    const phone = document.getElementById('phone-input').value;
-    const location = document.getElementById('location-input').value;
-    const payment = document.getElementById('payment-input').value;
-    const statusText = document.getElementById('order-status');
-    const paymentsList = document.getElementById('payments-list');
-
-    // 2. فحص الخانات
-    if (!phone || !location) {
-        alert("Please enter your phone and location! 🌸");
-        return;
-    }
-
-    statusText.innerText = "Processing your order... ⏳";
-
-    // 3. تجهيز البيانات
-    const orderData = {
-        phone: phone,
-        location: location,
-        paymentMethod: payment,
-        date: new Date().toLocaleString(),
-        status: "Paid"
-    };
-
-    try {
-        // 4. الإرسال لـ Firebase (تأكدي أن db معرفة مسبقاً)
-        await db.collection("orders").add(orderData);
-        
-        statusText.style.color = "#28a745";
-        statusText.innerText = "Order Confirmed! ✅🌸";
-
-        // 5. إضافة الطلب فوراً لخانة المدفوعات الجديدة
-        const newOrderEntry = `
-            <li style="border-bottom: 1px solid #eee; padding: 10px 0; font-size: 14px;">
-                <strong>Date:</strong> ${orderData.date} <br>
-                <strong>Method:</strong> ${payment} | <span style="color: green;">Status: Paid ✅</span>
-            </li>
-        `;
-        
-        if (paymentsList.innerHTML.includes("No orders yet")) {
-            paymentsList.innerHTML = newOrderEntry;
-        } else {
-            paymentsList.innerHTML = newOrderEntry + paymentsList.innerHTML;
-        }
-
-        alert("Order Confirmed! Thank you.");
-        
-        // مسح السلة بعد النجاح
-        localStorage.removeItem('cart');
-        
-    } catch (error) {
-        console.error("Error:", error);
-        statusText.style.color = "red";
-        statusText.innerText = "Error! Please try again. ❌";
-    }
-}
 <script type="module">
-           const allProducts = [
-    { id: 'qty_balloons1', name: 'Multicolor Balloons', price: 20 },
-    { id: 'qty_balloons2', name: 'Party Balloons', price: 20 },
-    { id: 'Pink Tulip', name: 'Pink Tulip', price: 10 },
-    { id: 'Lily', name: 'Lily Flower', price: 15 },
-    { id: 'Sunflower', name: 'Sunflower', price: 15 },
-    { id: 'White Tulip', name: 'White Tulip', price: 10 },
-    { id: 'Rose Bouquet', name: 'Rose Bouquet', price: 75 },
-    { id: 'Tulip Bouquet', name: 'Tulip Bouquet', price: 85 }
-];
-
-            allProducts.forEach(product => {
-                // نبحث في الذاكرة عن كل منتج
-                let qty = parseInt(localStorage.getItem(product.id)) || 0;
-                
-                if (qty > 0) {
-                    let cost = qty * product.price;
-                    total += cost;
-                    html += `
-                        <div class="item-row">
-                            <span>${product.name} (x${qty})</span>
-                            <span>${cost} SR</span>
-                        </div>`;
-                }
-            });
-
-            listDiv.innerHTML = html || "<p>Your cart is empty! 🌸</p>";
-            if (total > 0) {
-                listDiv.innerHTML += `<div class="total-price">Total Amount: ${total} SR</div>`;
-            }
-        }
-
-        function clearCart() {
-            localStorage.clear();
-            location.reload();
-        }
-
-       window.onload = loadFullCart;
-
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    // 1. Firebase Configuration (تأكدي أن الإعدادات مطابقة لمشروعك)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
-        apiKey: "AIzaSyDbtxONOkbqmuGu00JH9d94f9iTwoP4HNs",
-        authDomain: "flower-shop-9eace.firebaseapp.com",
-        projectId: "flower-shop-9eace",
-        storageBucket: "flower-shop-9eace.firebasestorage.app",
-        messagingSenderId: "837971089886",
-        appId: "1:837971089886:web:a997cd377acb5b7af5e54f"
+        apiKey: "AIzaSy...", 
+        authDomain: "your-app.firebaseapp.com",
+        projectId: "your-project-id",
+        storageBucket: "your-app.appspot.com",
+        messagingSenderId: "123456789",
+        appId: "1:12345:web:abc123"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-async function sendOrderToCloud() {
-    // 1. Fetching input values from HTML fields
-    const phone = document.getElementById('phone-input').value;
-    const locationInput = document.getElementById('location-input').value;
-    const payment = document.getElementById('payment-input').value;
-    const statusText = document.getElementById('order-status');
-    const paymentsList = document.getElementById('payments-list');
-    const btn = document.getElementById('order-btn');
 
-    // 2. Simple Validation check
-    if (!phone || !locationInput) {
-        alert("Please enter your phone number and location! 🌸");
-        return;
-    }
+    // 2. دالة عرض المنتجات في السلة (Load Cart)
+    function loadFullCart() {
+        const listDiv = document.getElementById('cart-items-list');
+        if (!listDiv) return;
 
-    // 3. Collecting items from the cart (localStorage)
-    let myOrder = [];
-    const products = [
-        { id: 'qty_balloons1', name: 'Multicolor Balloons' },
-        { id: 'qty_balloons2', name: 'Party Balloons' },
-        { id: 'Pink Tulip', name: 'Pink Tulip' },
-        { id: 'Lily', name: 'Lily Flower' },
-        { id: 'Sunflower', name: 'Sunflower' },
-        { id: 'White Tulip', name: 'White Tulip' },
-        { id: 'Rose Bouquet', name: 'Rose Bouquet' },
-        { id: 'Tulip Bouquet', name: 'Tulip Bouquet' }
-    ];
+        let html = "";
+        let total = 0;
 
-    products.forEach(p => {
-        let qty = parseInt(localStorage.getItem(p.id)) || 0;
-        if (qty > 0) {
-            myOrder.push({ product: p.name, quantity: qty });
-        }
-    });
+        // قائمة بكل المنتجات الممكنة في موقعك
+        const allProducts = [
+            { id: 'qty_balloons1', name: 'Multicolor Balloons', price: 20 },
+            { id: 'qty_balloons2', name: 'Party Balloons', price: 20 },
+            { id: 'Pink Tulip', name: 'Pink Tulip', price: 10 },
+            { id: 'Lily', name: 'Lily Flower', price: 15 },
+            { id: 'Sunflower', name: 'Sunflower', price: 15 },
+            { id: 'White Tulip', name: 'White Tulip', price: 10 },
+            { id: 'Rose Bouquet', name: 'Rose Bouquet', price: 75 },
+            { id: 'Tulip Bouquet', name: 'Tulip Bouquet', price: 85 }
+        ];
 
-    // Check if cart is actually empty
-    if (myOrder.length === 0) {
-        alert("Your cart is empty! Please select some flowers first. 🛒");
-        return;
-    }
-
-    // Update Button status during processing
-    btn.disabled = true;
-    btn.innerText = "Sending to Cloud... ⌛";
-
-    try {
-        // 4. Sending the complete data to Firebase Firestore
-        await addDoc(collection(db, "Orders"), {
-            customerPhone: phone,
-            customerLocation: locationInput,
-            paymentMethod: payment,
-            items: myOrder,
-            timestamp: new Date().toLocaleString(),
-            status: "New Order"
+        allProducts.forEach(p => {
+            let qty = parseInt(localStorage.getItem(p.id)) || 0;
+            if (qty > 0) {
+                let cost = qty * p.price;
+                total += cost;
+                html += `
+                    <div style="display:flex; justify-content:space-between; padding: 5px 0; border-bottom: 1px solid #eee;">
+                        <span>${p.name} (x${qty})</span>
+                        <span>${cost} SR</span>
+                    </div>`;
+            }
         });
 
-        // 5. Success Feedback in English
-        statusText.innerText = "Success! Your order has been sent. 🌸✅";
-        statusText.style.color = "green";
+        listDiv.innerHTML = html || "<p style='text-align:center; color:#999;'>Your cart is empty! 🌸</p>";
+        
+        if (total > 0) {
+            listDiv.innerHTML += `
+                <div style="text-align:right; font-weight:bold; margin-top:10px; color: #d63384;">
+                    Total: ${total} SR
+                </div>`;
+        }
+    }
 
-        // Update the Recent Payments history list immediately
-        const newEntry = `
-            <li style="border-bottom: 1px solid #eee; padding: 10px 0; font-size: 14px;">
-                <strong>Date:</strong> ${new Date().toLocaleTimeString()} | 
-                <strong>Status:</strong> <span style="color: green;">Paid ✅</span>
-            </li>`;
-            
-        if (paymentsList.innerHTML.includes("No orders confirmed")) {
-            paymentsList.innerHTML = newEntry;
-        } else {
-            paymentsList.innerHTML = newEntry + paymentsList.innerHTML;
+    // 3. دالة إرسال الطلب للكلاود (Confirm Order)
+    async function sendOrderToCloud() {
+        const phone = document.getElementById('phone-input').value;
+        const locationInput = document.getElementById('location-input').value;
+        const payment = document.getElementById('payment-input').value;
+        const statusText = document.getElementById('order-status');
+        const btn = document.getElementById('order-btn');
+        const paymentsList = document.getElementById('payments-list');
+
+        if (!phone || !locationInput) {
+            alert("Please enter your phone number and location! 🌸");
+            return;
         }
 
-        alert("Order confirmed successfully! Thank you.");
+        let myOrder = [];
+        const allProducts = ['qty_balloons1', 'qty_balloons2', 'Pink Tulip', 'Lily', 'Sunflower', 'White Tulip', 'Rose Bouquet', 'Tulip Bouquet'];
         
-        // Clear local storage and refresh page to reset UI
-        localStorage.clear(); 
-        setTimeout(() => window.location.reload(), 3000);
+        allProducts.forEach(id => {
+            let qty = parseInt(localStorage.getItem(id)) || 0;
+            if (qty > 0) {
+                myOrder.push({ name: id, quantity: qty });
+            }
+        });
 
-    } catch (e) {
-        console.error("Error details: ", e);
-        statusText.innerText = "Error sending order. Please try again. ❌";
-        statusText.style.color = "red";
-        btn.disabled = false;
-        btn.innerText = "Confirm Order & Send to Cloud ☁️✅";
+        if (myOrder.length === 0) {
+            alert("Cart is empty!");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Sending... ⌛";
+
+        try {
+            await addDoc(collection(db, "Orders"), {
+                customerPhone: phone,
+                customerLocation: locationInput,
+                paymentMethod: payment,
+                items: myOrder,
+                timestamp: new Date().toLocaleString(),
+                status: "New Order"
+            });
+
+            statusText.innerText = "Success! Order sent to Cloud ✅";
+            statusText.style.color = "green";
+
+            // تحديث السجل الوردي
+            const newEntry = `<li>Date: ${new Date().toLocaleTimeString()} | Status: Paid ✅</li>`;
+            paymentsList.innerHTML = newEntry + (paymentsList.innerHTML.includes("No orders") ? "" : paymentsList.innerHTML);
+
+            alert("Thank you! Order confirmed.");
+            localStorage.clear();
+            setTimeout(() => window.location.reload(), 3000);
+
+        } catch (e) {
+            console.error("Error: ", e);
+            statusText.innerText = "Error! Try again. ❌";
+            btn.disabled = false;
+        }
     }
-}
 
-// Global binding for the button click
-window.sendOrderToCloud = sendOrderToCloud;
-   
+    // ربط الدوال بالنافذة عشان تشتغل مع أزرار الـ HTML
+    window.onload = loadFullCart;
+    window.sendOrderToCloud = sendOrderToCloud;
+
+</script>
