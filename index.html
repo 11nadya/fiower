@@ -36,57 +36,94 @@
 <input type="password" id="pass" placeholder="Password"><br>
 
 <button onclick="login()">Login</button>
-<p id="msg"></p>
-<p style="margin-top: 20px; color: black;">
-    Don't have an account? 
-    <a href="Register.html" style="color: #c05a7a; text-decoration: none; font-weight: bold;">Register here</a>
-</p>  
-<script type="module">
-    
-  // 1. ربط المكتبات السحابية
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-  // 2. إعدادات مشروعك (Firebase Config)
-  const firebaseConfig = {
+<p id="msg"></p>
+
+<p style="margin-top: 20px; color: black;">
+    Don't have an account?
+    <a href="Register.html" style="color: #c05a7a; text-decoration: none; font-weight: bold;">
+        Register here
+    </a>
+</p>
+
+<script type="module">
+
+/* Firebase imports */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+
+import {
+    getFirestore,
+    collection,
+    getDocs
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+
+/* Firebase project config */
+const firebaseConfig = {
     apiKey: "AIzaSyDbtxONOkbqmuGu00JH9d94f9iTwoP4HNs",
     authDomain: "flower-shop-9eace.firebaseapp.com",
     projectId: "flower-shop-9eace",
     storageBucket: "flower-shop-9eace.firebasestorage.app",
     messagingSenderId: "837971089886",
     appId: "1:837971089886:web:a997cd377acb5b7af5e54f"
-  };
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
 
-  // 3. تعريف دالة تسجيل الدخول وربطها بالكلاود
-  window.login = async function() {
-    const userVal = document.getElementById("user").value;
-    const passVal = document.getElementById("pass").value;
+/* Start Firebase */
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    if (userVal !== "" && passVal !== "") {
-      try {
-        // إرسال البيانات فوراً لمخزن Firestore
-        await addDoc(collection(db, "users"), {
-          username: userVal,
-          password: passVal,
-          time: new Date().toLocaleString()
-        });
-        
-        alert("تم الحفظ في الكلاود! جاري الانتقال لموقع الورد..");
-        window.location.href = "flora.html"; 
-      } catch (error) {
-        console.error("Error:", error);
-        alert("فشل في الاتصال بالسحابة");
-      }
-    } else {
-      document.getElementById("msg").innerHTML = "يرجى ملء البيانات";
+
+/* Login function */
+window.login = async function () {
+
+    let u = document.getElementById("user").value;
+    let p = document.getElementById("pass").value;
+    let msg = document.getElementById("msg");
+
+    /* Empty fields check */
+    if (u === "" || p === "") {
+        msg.innerHTML = "Please fill all fields";
+        return;
     }
-  }
+
+    try {
+        /* Read users collection from Firestore */
+        const querySnapshot = await getDocs(collection(db, "users"));
+
+        let found = false;
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+
+            /* Check username + password match */
+            if (data.username === u && data.password === p) {
+                found = true;
+            }
+        });
+
+        /* Result */
+        if (found) {
+            msg.style.color = "green";
+            msg.innerHTML = "Login successful! Redirecting...";
+
+            setTimeout(function () {
+                window.location.href = "flora.html";
+            }, 1500);
+
+        } else {
+            msg.style.color = "red";
+            msg.innerHTML = "Invalid username or password";
+        }
+
+    } catch (error) {
+        console.error("Error:", error);
+        msg.style.color = "red";
+        msg.innerHTML = "Cloud connection failed";
+    }
+};
+
 </script>
-
-
 
 </body>
 </html>
