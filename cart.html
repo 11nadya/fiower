@@ -1,29 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Combined Cart 🛒</title>
+    <style>
+        /* التنسيق الخاص بك - حافظت على الستايل الوردي */
+        body { font-family: Arial, sans-serif; background-color: #fff0f3; padding: 20px; text-align: center; }
+        .cart-container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2a3b3; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #d63384; }
+        
+        /* مربع عرض الورد */
+        #cart-items-list { 
+            border: 2px solid #f2a3b3; 
+            border-radius: 15px; 
+            padding: 15px; 
+            margin-bottom: 20px; 
+            text-align: left; 
+            background-color: white;
+            min-height: 50px;
+        }
+
+        .delivery-details {
+            border: 1px solid #f2a3b3;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            background-color: #fff9fa;
+        }
+
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #d63384; }
+        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        
+        #order-btn { 
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            padding: 15px; 
+            width: 100%; 
+            border-radius: 10px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
+        #order-btn:disabled { background-color: #ccc; }
+        
+        .recent-payments { margin-top: 30px; background: white; padding: 15px; border-radius: 15px; border: 1px dashed #f2a3b3; }
+        .item-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+<div class="cart-container">
+    <h1>My Combined Cart 🛒</h1>
+    
+    <div id="cart-items-list">
+        <p style="text-align:center; color:#999;">Loading your flowers... 🌸</p>
+    </div>
+
+    <div class="delivery-details">
+        <h3>Delivery Details 🚚</h3>
+        <div class="input-group">
+            <label>Phone Number:</label>
+            <input type="text" id="phone-input" placeholder="05xxxxxxxx">
+        </div>
+
+        <div class="input-group">
+            <label>Location:</label>
+            <input type="text" id="location-input" placeholder="City, Street...">
+        </div>
+
+        <div class="input-group">
+            <label>Payment Method:</label>
+            <select id="payment-input">
+                <option value="Cash on Delivery">Cash on Delivery</option>
+                <option value="Online Payment">Online Payment</option>
+            </select>
+        </div>
+    </div>
+
+    <button id="order-btn" onclick="sendOrderToCloud()">Confirm Order & Send to Cloud ☁️✅</button>
+    
+    <p id="order-status" style="margin-top: 15px; font-weight: bold;"></p>
+
+    <div class="recent-payments">
+        <h3>Recent Payments 💳</h3>
+        <ul id="payments-list" style="list-style: none; padding: 0;">
+            <li style="color: #999;">No orders confirmed yet.</li>
+        </ul>
+    </div>
+</div>
+
 <script type="module">
-    // 1. Firebase Configuration (تأكدي أن الإعدادات مطابقة لمشروعك)
+    // --- 1. إعدادات Firebase ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
-        apiKey: "AIzaSy...", 
-        authDomain: "your-app.firebaseapp.com",
-        projectId: "your-project-id",
-        storageBucket: "your-app.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "1:12345:web:abc123"
+        apiKey: "AIzaSyDbtxONOkbqmuGu00JH9d94f9iTwoP4HNs",
+        authDomain: "flower-shop-9eace.firebaseapp.com",
+        projectId: "flower-shop-9eace",
+        storageBucket: "flower-shop-9eace.appspot.com",
+        messagingSenderId: "837971089886",
+        appId: "1:837971089886:web:a997cd377acb5b7af5e54f"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 2. دالة عرض المنتجات في السلة (Load Cart)
+    // --- 2. دالة عرض محتويات السلة ---
     function loadFullCart() {
         const listDiv = document.getElementById('cart-items-list');
-        if (!listDiv) return;
-
         let html = "";
         let total = 0;
 
-        // قائمة بكل المنتجات الممكنة في موقعك
+        // قائمة المنتجات والأسعار
         const allProducts = [
             { id: 'qty_balloons1', name: 'Multicolor Balloons', price: 20 },
             { id: 'qty_balloons2', name: 'Party Balloons', price: 20 },
@@ -40,25 +132,21 @@
             if (qty > 0) {
                 let cost = qty * p.price;
                 total += cost;
-                html += `
-                    <div style="display:flex; justify-content:space-between; padding: 5px 0; border-bottom: 1px solid #eee;">
-                        <span>${p.name} (x${qty})</span>
-                        <span>${cost} SR</span>
-                    </div>`;
+                html += `<div class="item-row">
+                            <span>${p.name} (x${qty})</span>
+                            <span>${cost} SR</span>
+                         </div>`;
             }
         });
 
         listDiv.innerHTML = html || "<p style='text-align:center; color:#999;'>Your cart is empty! 🌸</p>";
         
         if (total > 0) {
-            listDiv.innerHTML += `
-                <div style="text-align:right; font-weight:bold; margin-top:10px; color: #d63384;">
-                    Total: ${total} SR
-                </div>`;
+            listDiv.innerHTML += `<div style="text-align:right; font-weight:bold; margin-top:10px; color:#d63384;">Total: ${total} SR</div>`;
         }
     }
 
-    // 3. دالة إرسال الطلب للكلاود (Confirm Order)
+    // --- 3. دالة إرسال الطلب للكلاود ---
     async function sendOrderToCloud() {
         const phone = document.getElementById('phone-input').value;
         const locationInput = document.getElementById('location-input').value;
@@ -73,22 +161,22 @@
         }
 
         let myOrder = [];
-        const allProducts = ['qty_balloons1', 'qty_balloons2', 'Pink Tulip', 'Lily', 'Sunflower', 'White Tulip', 'Rose Bouquet', 'Tulip Bouquet'];
+        const ids = ['qty_balloons1', 'qty_balloons2', 'Pink Tulip', 'Lily', 'Sunflower', 'White Tulip', 'Rose Bouquet', 'Tulip Bouquet'];
         
-        allProducts.forEach(id => {
+        ids.forEach(id => {
             let qty = parseInt(localStorage.getItem(id)) || 0;
             if (qty > 0) {
-                myOrder.push({ name: id, quantity: qty });
+                myOrder.push({ product: id, quantity: qty });
             }
         });
 
         if (myOrder.length === 0) {
-            alert("Cart is empty!");
+            alert("Your cart is empty!");
             return;
         }
 
         btn.disabled = true;
-        btn.innerText = "Sending... ⌛";
+        btn.innerText = "Sending to Cloud... ⌛";
 
         try {
             await addDoc(collection(db, "Orders"), {
@@ -100,26 +188,35 @@
                 status: "New Order"
             });
 
-            statusText.innerText = "Success! Order sent to Cloud ✅";
+            statusText.innerText = "Success! Your order has been sent. 🌸✅";
             statusText.style.color = "green";
 
-            // تحديث السجل الوردي
-            const newEntry = `<li>Date: ${new Date().toLocaleTimeString()} | Status: Paid ✅</li>`;
-            paymentsList.innerHTML = newEntry + (paymentsList.innerHTML.includes("No orders") ? "" : paymentsList.innerHTML);
+            const newEntry = `<li style="border-bottom: 1px solid #eee; padding: 10px 0;">
+                <strong>Date:</strong> ${new Date().toLocaleTimeString()} | Status: Paid ✅</li>`;
+            
+            if (paymentsList.innerHTML.includes("No orders confirmed")) {
+                paymentsList.innerHTML = newEntry;
+            } else {
+                paymentsList.innerHTML = newEntry + paymentsList.innerHTML;
+            }
 
-            alert("Thank you! Order confirmed.");
+            alert("Order confirmed successfully! Thank you.");
             localStorage.clear();
             setTimeout(() => window.location.reload(), 3000);
 
         } catch (e) {
-            console.error("Error: ", e);
-            statusText.innerText = "Error! Try again. ❌";
+            console.error("Error details: ", e);
+            statusText.innerText = "Error sending order. Please try again. ❌";
+            statusText.style.color = "red";
             btn.disabled = false;
+            btn.innerText = "Confirm Order & Send to Cloud ☁️✅";
         }
     }
 
-    // ربط الدوال بالنافذة عشان تشتغل مع أزرار الـ HTML
+    // ربط الدوال بالنافذة (مهم جداً للـ module)
     window.onload = loadFullCart;
     window.sendOrderToCloud = sendOrderToCloud;
-
 </script>
+
+</body>
+</html>
