@@ -162,59 +162,94 @@ async function sendOrderToCloud() {
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+async function sendOrderToCloud() {
+    // 1. Fetching input values from HTML fields
+    const phone = document.getElementById('phone-input').value;
+    const locationInput = document.getElementById('location-input').value;
+    const payment = document.getElementById('payment-input').value;
+    const statusText = document.getElementById('order-status');
+    const paymentsList = document.getElementById('payments-list');
+    const btn = document.getElementById('order-btn');
 
-    async function sendOrderToCloud() {
-        const btn = document.getElementById('order-btn');
-        const status = document.getElementById('order-status');
-        let myOrder = [];
-
-        const products = [
-            { id: 'qty_balloons1', name: 'Multicolor Balloons' },
-            { id: 'qty_balloons2', name: 'Party Balloons' },
-            { id: 'Pink Tulip', name: 'Pink Tulip' },
-            { id: 'Lily', name: 'Lily Flower' },
-            { id: 'Sunflower', name: 'Sunflower' },
-            { id: 'White Tulip', name: 'White Tulip' },
-            { id: 'Rose Bouquet', name: 'Rose Bouquet' },
-            { id: 'Tulip Bouquet', name: 'Tulip Bouquet' }
-        ];
-
-        products.forEach(p => {
-            let qty = parseInt(localStorage.getItem(p.id)) || 0;
-            if (qty > 0) {
-                myOrder.push({ product: p.name, quantity: qty });
-            }
-        });
-
-        if (myOrder.length === 0) {
-            alert("السلة فاضية! اختاري ورد أول 🌸");
-            return;
-        }
-
-        btn.disabled = true;
-        btn.innerText = "جاري الإرسال للكلاود... ⏳";
-
-        try {
-            await addDoc(collection(db, "Orders"), {
-                items: myOrder,
-                timestamp: new Date().toLocaleString(),
-                status: "New Order"
-            });
-
-            status.innerHTML = "Success! 🎉 <br> تم إرسال طلبك للكلاود بنجاح";
-            status.style.color = "green";
-            localStorage.clear(); 
-            setTimeout(() => location.reload(), 3000);
-        } catch (e) {
-            console.error("Error: ", e);
-            status.innerText = "خطأ في الإرسال، حاولي مرة ثانية";
-            status.style.color = "red";
-            btn.disabled = false;
-            btn.innerText = "Confirm Order & Send to Cloud ☁️✅";
-        }
+    // 2. Simple Validation check
+    if (!phone || !locationInput) {
+        alert("Please enter your phone number and location! 🌸");
+        return;
     }
 
-    window.sendOrderToCloud = sendOrderToCloud;
-</script>
-</body>
-</html>
+    // 3. Collecting items from the cart (localStorage)
+    let myOrder = [];
+    const products = [
+        { id: 'qty_balloons1', name: 'Multicolor Balloons' },
+        { id: 'qty_balloons2', name: 'Party Balloons' },
+        { id: 'Pink Tulip', name: 'Pink Tulip' },
+        { id: 'Lily', name: 'Lily Flower' },
+        { id: 'Sunflower', name: 'Sunflower' },
+        { id: 'White Tulip', name: 'White Tulip' },
+        { id: 'Rose Bouquet', name: 'Rose Bouquet' },
+        { id: 'Tulip Bouquet', name: 'Tulip Bouquet' }
+    ];
+
+    products.forEach(p => {
+        let qty = parseInt(localStorage.getItem(p.id)) || 0;
+        if (qty > 0) {
+            myOrder.push({ product: p.name, quantity: qty });
+        }
+    });
+
+    // Check if cart is actually empty
+    if (myOrder.length === 0) {
+        alert("Your cart is empty! Please select some flowers first. 🛒");
+        return;
+    }
+
+    // Update Button status during processing
+    btn.disabled = true;
+    btn.innerText = "Sending to Cloud... ⌛";
+
+    try {
+        // 4. Sending the complete data to Firebase Firestore
+        await addDoc(collection(db, "Orders"), {
+            customerPhone: phone,
+            customerLocation: locationInput,
+            paymentMethod: payment,
+            items: myOrder,
+            timestamp: new Date().toLocaleString(),
+            status: "New Order"
+        });
+
+        // 5. Success Feedback in English
+        statusText.innerText = "Success! Your order has been sent. 🌸✅";
+        statusText.style.color = "green";
+
+        // Update the Recent Payments history list immediately
+        const newEntry = `
+            <li style="border-bottom: 1px solid #eee; padding: 10px 0; font-size: 14px;">
+                <strong>Date:</strong> ${new Date().toLocaleTimeString()} | 
+                <strong>Status:</strong> <span style="color: green;">Paid ✅</span>
+            </li>`;
+            
+        if (paymentsList.innerHTML.includes("No orders confirmed")) {
+            paymentsList.innerHTML = newEntry;
+        } else {
+            paymentsList.innerHTML = newEntry + paymentsList.innerHTML;
+        }
+
+        alert("Order confirmed successfully! Thank you.");
+        
+        // Clear local storage and refresh page to reset UI
+        localStorage.clear(); 
+        setTimeout(() => window.location.reload(), 3000);
+
+    } catch (e) {
+        console.error("Error details: ", e);
+        statusText.innerText = "Error sending order. Please try again. ❌";
+        statusText.style.color = "red";
+        btn.disabled = false;
+        btn.innerText = "Confirm Order & Send to Cloud ☁️✅";
+    }
+}
+
+// Global binding for the button click
+window.sendOrderToCloud = sendOrderToCloud;
+   
