@@ -8,7 +8,7 @@
         body { font-family: Arial, sans-serif; background-color: #fff0f3; padding: 20px; text-align: center; }
         .cart-container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 25px; border: 2px solid #f2a3b3; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
         
-        /* سهم الرجوع العلوي يوديك للهوم */
+        /* سهم الرجوع العلوي يوديك للهوم مباشرة */
         .back-arrow {
             position: absolute;
             top: 25px;
@@ -72,7 +72,7 @@
             <label>Location:</label>
             <input type="text" id="location-input" placeholder="City, Street...">
         </div>
-    </div>
+        </div>
 
     <button id="order-btn" onclick="sendOrderToCloud()">Confirm Order & Send to Cloud ☁️✅</button>
     <p id="order-status" style="margin-top: 15px; font-weight: bold;"></p>
@@ -150,7 +150,7 @@
         const statusText = document.getElementById('order-status');
         const btn = document.getElementById('order-btn');
 
-        if (!phone || !locationInput) { alert("Fill details! 🌸"); return; }
+        if (!phone || !locationInput) { alert("Please fill in your details! 🌸"); return; }
 
         let myOrder = [];
         productsRef.forEach(p => {
@@ -158,7 +158,7 @@
             if (qty > 0) myOrder.push({ product: p.name, quantity: qty });
         });
 
-        if (myOrder.length === 0) { alert("Empty!"); return; }
+        if (myOrder.length === 0) { alert("Cart is empty!"); return; }
 
         btn.disabled = true;
         btn.innerText = "Sending... ⌛";
@@ -170,12 +170,13 @@
                 items: myOrder,
                 timestamp: new Date().toLocaleString()
             });
-            alert("Success!");
+            alert("Order Success! ✅");
             productsRef.forEach(p => localStorage.removeItem(p.id));
             window.location.reload();
         } catch (e) {
             console.error(e);
             btn.disabled = false;
+            btn.innerText = "Confirm Order & Send to Cloud ☁️✅";
         }
     }
 
