@@ -19,17 +19,96 @@
     <button onclick="clearCart()" style="margin-top:20px; background:#999; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">Empty Cart 🗑️</button>
     <br>
     <a href="flora.html" class="btn-home">Back to Home 🌸</a>
+    <div id="user-info" style="background: white; border: 2px solid #f2a3b3; border-radius: 15px; padding: 15px; max-width: 500px; margin: 20px auto; text-align: left;">
+    <h3 style="color: #c05a7a; text-align: center; margin-top: 0;">Delivery Details 🚚</h3>
+    
+    <div style="margin-bottom: 10px;">
+        <label style="font-weight: bold; color: #c05a7a;">Phone Number:</label><br>
+        <input type="text" id="phone-input" placeholder="05xxxxxxxx" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">
+    </div>
+
+    <div style="margin-bottom: 10px;">
+        <label style="font-weight: bold; color: #c05a7a;">Location:</label><br>
+        <input type="text" id="location-input" placeholder="City, Street..." style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">
+    </div>
+
+    <div style="margin-bottom: 10px;">
+        <label style="font-weight: bold; color: #c05a7a;">Payment Method:</label><br>
+        <select id="payment-input" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">
+            <option value="Cash">Cash on Delivery</option>
+            <option value="Mada">Mada / Apple Pay</option>
+        </select>
+    </div>
+</div>
 <button id="order-btn" onclick="sendOrderToCloud()" style="margin-top:20px; background:#28a745; color:white; border:none; padding:12px 20px; border-radius:8px; cursor:pointer; font-weight:bold; width:100%; font-size:1.1em;">
     Confirm Order & Send to Cloud ☁️✅
 </button>
-<p id="order-status" style="text-align:center; font-weight:bold; margin-top:10px;"></p>
-    <script>
-        function loadFullCart() {
-            const listDiv = document.getElementById('cart-list');
-            let total = 0;
-            let html = "";
+    <p id="order-status" style="text-align:center; font-weight:bold;"></p>
+<div id="orders-history" style="background: white; border: 2px solid #f2a3b3; border-radius: 15px; padding: 15px; max-width: 500px; margin: 20px auto; text-align: left;">
+    <h3 style="color: #c05a7a; text-align: center; margin-top: 0;">Recent Payments 💳</h3>
+    <ul id="payments-list" style="list-style: none; padding: 0;">
+        <li style="color: #999; text-align: center;">No orders confirmed yet.</li>
+    </ul>
+</div>    <script>
+async function sendOrderToCloud() {
+    // 1. سحب البيانات من الخانات
+    const phone = document.getElementById('phone-input').value;
+    const location = document.getElementById('location-input').value;
+    const payment = document.getElementById('payment-input').value;
+    const statusText = document.getElementById('order-status');
+    const paymentsList = document.getElementById('payments-list');
 
-            // قائمة شاملة لكل المنتجات اللي في صفحاتك (ورد + بالونات)
+    // 2. فحص الخانات
+    if (!phone || !location) {
+        alert("Please enter your phone and location! 🌸");
+        return;
+    }
+
+    statusText.innerText = "Processing your order... ⏳";
+
+    // 3. تجهيز البيانات
+    const orderData = {
+        phone: phone,
+        location: location,
+        paymentMethod: payment,
+        date: new Date().toLocaleString(),
+        status: "Paid"
+    };
+
+    try {
+        // 4. الإرسال لـ Firebase (تأكدي أن db معرفة مسبقاً)
+        await db.collection("orders").add(orderData);
+        
+        statusText.style.color = "#28a745";
+        statusText.innerText = "Order Confirmed! ✅🌸";
+
+        // 5. إضافة الطلب فوراً لخانة المدفوعات الجديدة
+        const newOrderEntry = `
+            <li style="border-bottom: 1px solid #eee; padding: 10px 0; font-size: 14px;">
+                <strong>Date:</strong> ${orderData.date} <br>
+                <strong>Method:</strong> ${payment} | <span style="color: green;">Status: Paid ✅</span>
+            </li>
+        `;
+        
+        if (paymentsList.innerHTML.includes("No orders yet")) {
+            paymentsList.innerHTML = newOrderEntry;
+        } else {
+            paymentsList.innerHTML = newOrderEntry + paymentsList.innerHTML;
+        }
+
+        alert("Order Confirmed! Thank you.");
+        
+        // مسح السلة بعد النجاح
+        localStorage.removeItem('cart');
+        
+    } catch (error) {
+        console.error("Error:", error);
+        statusText.style.color = "red";
+        statusText.innerText = "Error! Please try again. ❌";
+    }
+}
+</script>
+
            const allProducts = [
     { id: 'qty_balloons1', name: 'Multicolor Balloons', price: 20 },
     { id: 'qty_balloons2', name: 'Party Balloons', price: 20 },
