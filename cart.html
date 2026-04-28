@@ -5,49 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Combined Cart 🛒</title>
     <style>
-        /* التنسيق الخاص بك - حافظت على الستايل الوردي */
         body { font-family: Arial, sans-serif; background-color: #fff0f3; padding: 20px; text-align: center; }
-        .cart-container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2a3b3; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1 { color: #d63384; }
+        .cart-container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 25px; border: 2px solid #f2a3b3; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #d63384; font-size: 28px; margin-bottom: 20px; }
         
-        /* مربع عرض الورد */
         #cart-items-list { 
             border: 2px solid #f2a3b3; 
             border-radius: 15px; 
             padding: 15px; 
-            margin-bottom: 20px; 
+            margin-bottom: 10px; 
             text-align: left; 
-            background-color: white;
-            min-height: 50px;
+            background-color: #fff;
+        }
+
+        /* زر الحذف الفردي */
+        .delete-item-btn {
+            background: none;
+            border: none;
+            color: #ff4d6d;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0 5px;
+            transition: 0.2s;
+        }
+        .delete-item-btn:hover { color: #b91d3b; transform: scale(1.2); }
+
+        .empty-btn {
+            background-color: #ff4d6d;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            margin-bottom: 20px;
         }
 
         .delivery-details {
             border: 1px solid #f2a3b3;
             padding: 15px;
-            border-radius: 15px;
+            border-radius: 20px;
             margin-bottom: 20px;
             background-color: #fff9fa;
         }
 
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #d63384; }
-        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
         
         #order-btn { 
-            background-color: #28a745; 
+            background-color: #4caf50; 
             color: white; 
             border: none; 
-            padding: 15px; 
+            padding: 18px; 
             width: 100%; 
-            border-radius: 10px; 
-            font-size: 16px; 
+            border-radius: 12px; 
+            font-size: 18px; 
             cursor: pointer; 
             font-weight: bold; 
         }
-        #order-btn:disabled { background-color: #ccc; }
         
-        .recent-payments { margin-top: 30px; background: white; padding: 15px; border-radius: 15px; border: 1px dashed #f2a3b3; }
-        .item-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .item-info { display: flex; align-items: center; gap: 10px; }
+        .total-row { text-align: right; font-weight: bold; margin-top: 10px; color: #d63384; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -56,8 +77,10 @@
     <h1>My Combined Cart 🛒</h1>
     
     <div id="cart-items-list">
-        <p style="text-align:center; color:#999;">Loading your flowers... 🌸</p>
+        <p style="text-align:center; color:#999;">Loading Flowers... 🌸</p>
     </div>
+
+    <button class="empty-btn" onclick="clearCart()">Empty All Cart 🗑️</button>
 
     <div class="delivery-details">
         <h3>Delivery Details 🚚</h3>
@@ -65,12 +88,10 @@
             <label>Phone Number:</label>
             <input type="text" id="phone-input" placeholder="05xxxxxxxx">
         </div>
-
         <div class="input-group">
             <label>Location:</label>
             <input type="text" id="location-input" placeholder="City, Street...">
         </div>
-
         <div class="input-group">
             <label>Payment Method:</label>
             <select id="payment-input">
@@ -81,19 +102,10 @@
     </div>
 
     <button id="order-btn" onclick="sendOrderToCloud()">Confirm Order & Send to Cloud ☁️✅</button>
-    
     <p id="order-status" style="margin-top: 15px; font-weight: bold;"></p>
-
-    <div class="recent-payments">
-        <h3>Recent Payments 💳</h3>
-        <ul id="payments-list" style="list-style: none; padding: 0;">
-            <li style="color: #999;">No orders confirmed yet.</li>
-        </ul>
-    </div>
 </div>
 
 <script type="module">
-    // --- 1. إعدادات Firebase ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -109,74 +121,79 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // --- 2. دالة عرض محتويات السلة ---
+    const productsRef = [
+        { id: 'qty_balloons1', name: 'Multicolor Balloons', price: 20 },
+        { id: 'qty_balloons2', name: 'Party Balloons', price: 20 },
+        { id: 'Pink Tulip', name: 'Pink Tulip', price: 10 },
+        { id: 'Lily', name: 'Lily Flower', price: 15 },
+        { id: 'Sunflower', name: 'Sunflower', price: 15 },
+        { id: 'White Tulip', name: 'White Tulip', price: 10 },
+        { id: 'Rose Bouquet', name: 'Rose Bouquet', price: 75 },
+        { id: 'Tulip Bouquet', name: 'Tulip Bouquet', price: 85 }
+    ];
+
+    // 1. عرض السلة مع زر حذف لكل منتج
     function loadFullCart() {
         const listDiv = document.getElementById('cart-items-list');
         let html = "";
         let total = 0;
 
-        // قائمة المنتجات والأسعار
-        const allProducts = [
-            { id: 'qty_balloons1', name: 'Multicolor Balloons', price: 20 },
-            { id: 'qty_balloons2', name: 'Party Balloons', price: 20 },
-            { id: 'Pink Tulip', name: 'Pink Tulip', price: 10 },
-            { id: 'Lily', name: 'Lily Flower', price: 15 },
-            { id: 'Sunflower', name: 'Sunflower', price: 15 },
-            { id: 'White Tulip', name: 'White Tulip', price: 10 },
-            { id: 'Rose Bouquet', name: 'Rose Bouquet', price: 75 },
-            { id: 'Tulip Bouquet', name: 'Tulip Bouquet', price: 85 }
-        ];
-
-        allProducts.forEach(p => {
+        productsRef.forEach(p => {
             let qty = parseInt(localStorage.getItem(p.id)) || 0;
             if (qty > 0) {
                 let cost = qty * p.price;
                 total += cost;
-                html += `<div class="item-row">
+                html += `
+                    <div class="item-row">
+                        <div class="item-info">
+                            <button class="delete-item-btn" onclick="deleteOneItem('${p.id}')" title="Remove Item">🗑️</button>
                             <span>${p.name} (x${qty})</span>
-                            <span>${cost} SR</span>
-                         </div>`;
+                        </div>
+                        <span>${cost} SR</span>
+                    </div>`;
             }
         });
 
         listDiv.innerHTML = html || "<p style='text-align:center; color:#999;'>Your cart is empty! 🌸</p>";
-        
         if (total > 0) {
-            listDiv.innerHTML += `<div style="text-align:right; font-weight:bold; margin-top:10px; color:#d63384;">Total: ${total} SR</div>`;
+            listDiv.innerHTML += `<div class="total-row">Total: ${total} SR</div>`;
         }
     }
 
-    // --- 3. دالة إرسال الطلب للكلاود ---
-    async function sendOrderToCloud() {
+    // 2. دالة حذف نوع واحد من الورد
+    window.deleteOneItem = function(id) {
+        localStorage.removeItem(id); // حذف المنتج من الذاكرة
+        loadFullCart(); // تحديث القائمة فوراً بدون ريفريش للصفحة كاملة
+    }
+
+    // 3. حذف الكل
+    window.clearCart = function() {
+        if (confirm("Empty whole cart? 🗑️")) {
+            productsRef.forEach(p => localStorage.removeItem(p.id));
+            window.location.reload();
+        }
+    }
+
+    // 4. إرسال للـ Firebase
+    window.sendOrderToCloud = async function() {
         const phone = document.getElementById('phone-input').value;
         const locationInput = document.getElementById('location-input').value;
         const payment = document.getElementById('payment-input').value;
         const statusText = document.getElementById('order-status');
         const btn = document.getElementById('order-btn');
-        const paymentsList = document.getElementById('payments-list');
 
-        if (!phone || !locationInput) {
-            alert("Please enter your phone number and location! 🌸");
-            return;
-        }
+        if (!phone || !locationInput) { alert("Fill details! 🌸"); return; }
 
         let myOrder = [];
-        const ids = ['qty_balloons1', 'qty_balloons2', 'Pink Tulip', 'Lily', 'Sunflower', 'White Tulip', 'Rose Bouquet', 'Tulip Bouquet'];
-        
-        ids.forEach(id => {
-            let qty = parseInt(localStorage.getItem(id)) || 0;
-            if (qty > 0) {
-                myOrder.push({ product: id, quantity: qty });
-            }
+        productsRef.forEach(p => {
+            let qty = parseInt(localStorage.getItem(p.id)) || 0;
+            if (qty > 0) myOrder.push({ product: p.name, quantity: qty });
         });
 
-        if (myOrder.length === 0) {
-            alert("Your cart is empty!");
-            return;
-        }
+        if (myOrder.length === 0) { alert("Empty!"); return; }
 
         btn.disabled = true;
-        btn.innerText = "Sending to Cloud... ⌛";
+        btn.innerText = "Sending... ⌛";
 
         try {
             await addDoc(collection(db, "Orders"), {
@@ -184,38 +201,18 @@
                 customerLocation: locationInput,
                 paymentMethod: payment,
                 items: myOrder,
-                timestamp: new Date().toLocaleString(),
-                status: "New Order"
+                timestamp: new Date().toLocaleString()
             });
-
-            statusText.innerText = "Success! Your order has been sent. 🌸✅";
-            statusText.style.color = "green";
-
-            const newEntry = `<li style="border-bottom: 1px solid #eee; padding: 10px 0;">
-                <strong>Date:</strong> ${new Date().toLocaleTimeString()} | Status: Paid ✅</li>`;
-            
-            if (paymentsList.innerHTML.includes("No orders confirmed")) {
-                paymentsList.innerHTML = newEntry;
-            } else {
-                paymentsList.innerHTML = newEntry + paymentsList.innerHTML;
-            }
-
-            alert("Order confirmed successfully! Thank you.");
-            localStorage.clear();
-            setTimeout(() => window.location.reload(), 3000);
-
+            alert("Success!");
+            productsRef.forEach(p => localStorage.removeItem(p.id));
+            window.location.reload();
         } catch (e) {
-            console.error("Error details: ", e);
-            statusText.innerText = "Error sending order. Please try again. ❌";
-            statusText.style.color = "red";
+            console.error(e);
             btn.disabled = false;
-            btn.innerText = "Confirm Order & Send to Cloud ☁️✅";
         }
     }
 
-    // ربط الدوال بالنافذة (مهم جداً للـ module)
     window.onload = loadFullCart;
-    window.sendOrderToCloud = sendOrderToCloud;
 </script>
 
 </body>
